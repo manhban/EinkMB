@@ -2,8 +2,10 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ManhBan Clock</title>
+  <title>ManhBan Clock v1.2</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{
@@ -158,7 +160,7 @@ async function testWrite() {
 }
 
 async function syn(){
-  const b=document.querySelector('.b-green');b.disabled=!0;b.innerHTML='<span class="spin"></span> Đang đồng bộ...'
+  lg('SYNC: bat dau...');const b=document.querySelector('.b-green');b.disabled=!0;b.innerHTML='<span class="spin"></span> Đang đồng bộ...'
   try{
     while(Date.now()%1000>50)await wait(20)
     const n=new Date()
@@ -178,14 +180,9 @@ async function syn(){
     try {
       await h.writeValue(buf)
     } catch(e1) {
-      lg('writeValue that bai, thu writeValueWithResponse...')
-      try {
-        await h.writeValueWithResponse(buf)
-      } catch(e2) {
-        lg('Ghi that bai hoan toan: '+e1.message, 'er')
-        b.disabled=!1;b.innerHTML='⏱ Đồng bộ'
-        return
-      }
+      lg('writeValue loi: '+e1.message, 'er')
+      b.disabled=!1;b.innerHTML='⏱ Đồng bộ'
+      return
     }
     lg('Ghi OK! Doc lai...')
     await rd()
