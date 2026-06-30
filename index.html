@@ -1,230 +1,126 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ManhBan Clock v1.2</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
-      background:#0b0e14;color:#e8edf5;min-height:100vh;
-      display:flex;justify-content:center;align-items:center;padding:12px
-    }
-    .box{
-      max-width:400px;width:100%;background:#151a22;
-      border-radius:20px;padding:20px;box-shadow:0 8px 40px rgba(0,0,0,.5)
-    }
-    h1{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;
-       background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .sub{text-align:center;font-size:12px;color:#6b7280;margin-bottom:16px}
-    .bar{
-      display:flex;justify-content:space-between;align-items:center;
-      background:#1e2630;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:13px
-    }
-    .bar .on{color:#34d399}.bar .off{color:#f87171}
-    button{
-      display:inline-flex;align-items:center;justify-content:center;gap:6px;
-      padding:11px 16px;border:none;border-radius:10px;font-size:13px;font-weight:600;
-      cursor:pointer;transition:.2s;width:100%;color:#fff
-    }
-    button:active{transform:scale(.97)}
-    button:disabled{opacity:.35;cursor:default}
-    .b-blue{background:#2563eb}.b-red{background:#dc2626}
-    .b-green{background:#059669}.b-yellow{background:#d97706}
-    .b-gray{background:#1e2630;color:#9ca3af;border:1px solid #2d3748}
-    .grp{display:flex;gap:6px;flex-wrap:wrap}
-    .grp button{flex:1;min-width:90px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}
-    .crd{background:#1e2630;border-radius:10px;padding:10px;text-align:center}
-    .crd .l{font-size:10px;color:#6b7280}
-    .crd .v{font-size:16px;font-weight:700;margin-top:2px}
-    .crd .v.s{font-size:12px}
-    .hid{display:none!important}
-    .log{
-      background:#0b0e14;border-radius:10px;padding:10px;margin-top:12px;
-      height:110px;overflow-y:auto;font-family:'Courier New',monospace;font-size:10px;line-height:1.6
-    }
-    .log::-webkit-scrollbar{width:3px}
-    .log::-webkit-scrollbar-thumb{background:#374151;border-radius:2px}
-    .log .i{color:#93c5fd}.log .ok{color:#34d399}.log .er{color:#f87171}
-    .sec{font-size:12px;font-weight:600;color:#9ca3af;margin:12px 0 6px}
-    .epd{
-      background:#e8e4da;border-radius:10px;padding:14px;margin:12px 0;
-      color:#1a1a1a;font-family:'Courier New',monospace;text-align:center
-    }
-    .epd .t{font-size:38px;font-weight:700;letter-spacing:3px}
-    .epd .d{font-size:12px;margin-top:4px}
-    .epd .l{font-size:10px;margin-top:3px;color:#666}
-    .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:s .6s linear infinite}
-    @keyframes s{to{transform:rotate(360deg)}}
-  </style>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ManhBan Clock v1.3</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#111;color:#eee;padding:16px;max-width:400px;margin:auto}
+.box{background:#1a1a2e;border-radius:16px;padding:20px}
+h1{font-size:20px;text-align:center;margin-bottom:16px;color:#7c3aed}
+.bar{display:flex;justify-content:space-between;background:#16213e;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px}
+.on{color:#34d399}.off{color:#ef4444}
+button{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;color:#fff}
+button:active{opacity:.7}button:disabled{opacity:.4}
+.b-blue{background:#2563eb}.b-red{background:#dc2626}.b-green{background:#059669}
+.b-yellow{background:#d97706}
+.hid{display:none!important}
+.log{background:#0a0a1a;border-radius:10px;padding:10px;height:200px;overflow-y:auto;font-family:monospace;font-size:11px;line-height:1.6;margin-top:12px}
+.log .i{color:#93c5fd}.log .ok{color:#34d399}.log .er{color:#f87171}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.card{background:#16213e;border-radius:8px;padding:10px;text-align:center}
+.card .l{font-size:10px;color:#888}.card .v{font-size:18px;font-weight:700;margin-top:2px}
+</style>
 </head>
 <body>
 <div class="box">
-  <h1>ManhBan Clock</h1>
-  <p class="sub">Điều khiển đồng hồ E-Ink</p>
-
-  <div class="bar">
-    <span id="st">Chưa kết nối</span>
-    <span id="sd" class="off">●</span>
+<h1>ManhBan Clock</h1>
+<div class="bar"><span id="st">Chưa kết nối</span><span id="sd" class="off">●</span></div>
+<button id="bc" class="b-blue" onclick="conn()">🔗 Kết nối</button>
+<div id="pn" class="hid">
+  <div class="grid">
+    <div class="card"><div class="l">Thiết bị</div><div class="v" id="dn" style="font-size:12px">---</div></div>
+    <div class="card"><div class="l">Pin</div><div class="v" id="dv">--V</div></div>
+    <div class="card"><div class="l">Giờ TB</div><div class="v" id="dt" style="font-size:12px">--:--:--</div></div>
+    <div class="card"><div class="l">Kết quả</div><div class="v" id="wr" style="font-size:12px">---</div></div>
   </div>
-
-  <button id="bc" class="b-blue" onclick="go()">🔗 <span id="bl">Kết nối</span></button>
-
-  <div id="pn" class="hid">
-    <div class="epd">
-      <div class="t" id="epdT">14:35</div>
-      <div class="d" id="epdD">30/06/2025  Thứ 2</div>
-      <div class="l" id="epdL">Âm lịch ngày 15/5</div>
-    </div>
-
-    <div class="grid">
-      <div class="crd"><div class="l">Thiết bị</div><div class="v s" id="dn">---</div></div>
-      <div class="crd"><div class="l">Pin</div><div class="v" id="dv">--.-V</div></div>
-      <div class="crd"><div class="l">Giờ TB</div><div class="v" id="dt" style="font-size:14px">--:--:--</div></div>
-      <div class="crd"><div class="l">Giờ Web</div><div class="v" id="sw" style="font-size:14px">--:--:--</div></div>
-    </div>
-
-    <div class="grp">
-      <button class="b-green" onclick="syn()">⏱ Đồng bộ</button>
-      <button class="b-yellow" onclick="tog()">🔄 12/24h</button>
-    </div>
-    <div class="sec">🔧 Nâng cao</div>
-    <div class="grp">
-      <button class="b-gray" onclick="cal()">📐 Hiệu chỉnh</button>
-    </div>
-  </div>
-
-  <div class="log" id="lg"></div>
+  <button class="b-green" onclick="doWrite(0x90)">🔄 Test ghi 0x90 (1 byte)</button>
+  <button class="b-yellow" onclick="doWrite(0x91)">⏱ Test ghi 0x91 (12 byte)</button>
 </div>
-
+<div class="log" id="lg"></div>
+</div>
 <script>
 function lg(m,t){const e=document.getElementById('lg')
-  e.innerHTML+=`<div class="${t}">[${new Date().toLocaleTimeString()}] ${m}</div>`;e.scrollTop=e.scrollHeight}
-setInterval(()=>{document.getElementById('sw').textContent=new Date().toLocaleString()},1000)
-
+  e.innerHTML+=`<div class="${t}">${m}</div>`;e.scrollTop=e.scrollHeight}
 let d,s,c,h,a,ok=!1
-async function go(){
+
+async function conn(){
   if(ok){dc();return}
-  const b=document.getElementById('bc');b.disabled=!0;document.getElementById('bl').textContent='Đang kết nối...'
+  const b=document.getElementById('bc');b.disabled=!0;b.innerHTML='⏳ Đang kết nối...'
   try{
-    lg('Đang tìm DLG-CLOCK...')
+    lg('Browser: '+navigator.userAgent.slice(0,60),'i')
+    lg('Đang tìm DLG-CLOCK...','i')
     d=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'DLG-CLOCK'}],optionalServices:[0xFF00]})
     d.ongattserverdisconnected=onDisc
-    s=await d.gatt.connect();c=await s.getPrimaryService(0xFF00)
+    s=await d.gatt.connect()
+    lg('Đã kết nối GATT','ok')
+    c=await s.getPrimaryService(0xFF00)
+    lg('Service 0xFF00 OK','ok')
     h=await c.getCharacteristic(0xFF01);a=await c.getCharacteristic(0xFF02)
-    lg('Properties: write='+h.properties.write+' writeWithoutResponse='+h.properties.writeWithoutResponse, 'ok')
+    lg('Chars OK','ok')
+    lg('Properties: write='+h.properties.write+' w/oResp='+h.properties.writeWithoutResponse, 'i')
     document.getElementById('dn').textContent=d.name
-    await rd()
+    try{
+      const v=await a.readValue();const vt=v.getUint16(0,!0)/1000
+      document.getElementById('dv').textContent=vt.toFixed(2)+'V'
+      lg('Pin: '+vt.toFixed(2)+'V','ok')
+    }catch(e){lg('Đọc pin lỗi: '+e.message,'er')}
     ok=!0;document.getElementById('st').textContent='Đã kết nối';document.getElementById('sd').className='on'
     document.getElementById('pn').classList.remove('hid')
-    document.getElementById('bl').textContent='Ngắt';b.className='b-red'
-    lg('Kết nối thành công!','ok')
-  }catch(e){lg('Lỗi: '+e.message,'er');dc()}
+    document.getElementById('bc').textContent='🔌 Ngắt';document.getElementById('bc').className='b-red'
+  }catch(e){lg('LỖI: '+e.message,'er');dc()}
   b.disabled=!1
 }
 
-async function rd(){
+async function doWrite(cmd){
+  if(!h){lg('Chưa kết nối!','er');return}
+  const btn=(cmd==0x90)?document.querySelector('.b-green'):document.querySelector('.b-yellow')
+  btn.disabled=!0
+  lg('=== GHI 0x'+cmd.toString(16)+' ===','i')
   try{
-    const v=await a.readValue();const vt=v.getUint16(0,!0)/1000
-    document.getElementById('dv').textContent=vt.toFixed(2)+'V'
-  }catch(e){}
-  try{
-    const t=await h.readValue()
-    const y=t.getUint16(0,!0),m=t.getUint8(2),dd=t.getUint8(3),h2=t.getUint8(4),mi=t.getUint8(5),s2=t.getUint8(6)
-    const w=t.getUint8(8),wds=['CN','2','3','4','5','6','7']
-    document.getElementById('dt').textContent=`${y}/${String(m+1).padStart(2,'0')}/${String(dd).padStart(2,'0')} ${String(h2).padStart(2,'0')}:${String(mi).padStart(2,'0')}:${String(s2).padStart(2,'0')}`
-    document.getElementById('epdT').textContent=`${String(h2).padStart(2,'0')}:${String(mi).padStart(2,'0')}`
-    document.getElementById('epdD').textContent=`${String(dd).padStart(2,'0')}/${String(m+1).padStart(2,'0')}/${y}  Thứ ${wds[w]||'?'}`
-    lg('Đã đọc dữ liệu','ok')
-  }catch(e){lg('Lỗi đọc: '+e.message,'er')}
-}
-
-async function testWrite() {
-  lg('TEST: ghi 1 byte 0x90...')
-  try {
-    await h.writeValue(new Uint8Array([0x90]))
-    lg('TEST: writeValue 0x90 OK!', 'ok')
-  } catch(e) {
-    lg('TEST: writeValue 0x90 that bai: '+e.message, 'er')
-    try {
-      await h.writeValueWithResponse(new Uint8Array([0x90]))
-      lg('TEST: writeValueWithResponse 0x90 OK!', 'ok')
-    } catch(e2) {
-      lg('TEST: ca 2 deu that bai: '+e2.message, 'er')
+    const n=new Date()
+    const buf=new Uint8Array(cmd==0x90?1:12)
+    buf[0]=cmd
+    if(cmd==0x91){
+      buf[1]=n.getFullYear()&255;buf[2]=(n.getFullYear()>>8)&255
+      buf[3]=n.getMonth();buf[4]=n.getDate();buf[5]=n.getHours()
+      buf[6]=n.getMinutes();buf[7]=n.getSeconds();buf[8]=n.getDay()
+      buf[9]=n.getFullYear()-2020;buf[10]=n.getMonth();buf[11]=1
+    }
+    lg('Thử writeValue()...','i')
+    await h.writeValue(buf)
+    lg('writeValue() THÀNH CÔNG!','ok')
+    document.getElementById('wr').textContent='OK'
+  }catch(e1){
+    lg('writeValue() lỗi: '+e1.message,'er')
+    lg('Thử writeValueWithResponse()...','i')
+    try{
+      const n=new Date()
+      const buf=new Uint8Array(cmd==0x90?1:12)
+      buf[0]=cmd
+      if(cmd==0x91){
+        buf[1]=n.getFullYear()&255;buf[2]=(n.getFullYear()>>8)&255
+        buf[3]=n.getMonth();buf[4]=n.getDate();buf[5]=n.getHours()
+        buf[6]=n.getMinutes();buf[7]=n.getSeconds();buf[8]=n.getDay()
+        buf[9]=n.getFullYear()-2020;buf[10]=n.getMonth();buf[11]=1
+      }
+      await h.writeValueWithResponse(buf)
+      lg('writeValueWithResponse() THÀNH CÔNG!','ok')
+      document.getElementById('wr').textContent='OK'
+    }catch(e2){
+      lg('writeValueWithResponse() lỗi: '+e2.message,'er')
+      document.getElementById('wr').textContent='LỖI'
     }
   }
-}
-
-async function syn(){
-  lg('SYNC: bat dau...');const b=document.querySelector('.b-green');b.disabled=!0;b.innerHTML='<span class="spin"></span> Đang đồng bộ...'
-  try{
-    while(Date.now()%1000>50)await wait(20)
-    const n=new Date()
-    let lm=1,ld=1,ly=n.getFullYear()-2020
-    try{
-      const loc=n.toLocaleDateString('vi-VN-u-ca-chinese',{month:'numeric',day:'numeric'})
-      const p=loc.replace('Tháng ','').split(',')[0].split('/')
-      if(p.length>=2){lm=parseInt(p[0])||1;ld=parseInt(p[1])||1}
-      ly=parseInt(n.toLocaleDateString('vi-VN-u-ca-chinese',{year:'numeric'}))-2020
-    }catch(e){lm=n.getMonth()+1}
-    const buf=new Uint8Array(12)
-    buf[0]=0x91;buf[1]=n.getFullYear()&255;buf[2]=(n.getFullYear()>>8)&255
-    buf[3]=n.getMonth();buf[4]=n.getDate();buf[5]=n.getHours()
-    buf[6]=n.getMinutes();buf[7]=n.getSeconds();buf[8]=n.getDay()
-    buf[9]=ly;buf[10]=lm-1;buf[11]=ld
-    lg('Ghi '+buf.length+' bytes...')
-    try {
-      await h.writeValue(buf)
-    } catch(e1) {
-      lg('writeValue loi: '+e1.message, 'er')
-      b.disabled=!1;b.innerHTML='⏱ Đồng bộ'
-      return
-    }
-    lg('Ghi OK! Doc lai...')
-    await rd()
-    lg('Đồng bộ xong!','ok')
-  }catch(e){lg('Lỗi: '+e.message,'er')}
-  b.disabled=!1;b.innerHTML='⏱ Đồng bộ'
-}
-
-async function tog(){
-  try{await h.writeValueWithResponse(new Uint8Array([0x90]));lg('Đã chuyển 12h/24h','ok')}
-  catch(e){lg('Lỗi: '+e.message,'er')}
-}
-
-async function cal(){
-  const b=document.querySelector('.b-gray');b.disabled=!0
-  try{
-    const cur=await h.readValue(),lm=cur.getUint8(5),cm=cur.getInt32(7,!0)
-    lg('Phút từ đồng bộ: '+cm)
-    if(cm<2880){lg('Cần chờ >2 ngày!','er');b.disabled=!1;return}
-    lg('Chờ nhảy phút...')
-    let nm=lm;while(nm===lm){const t=await h.readValue();nm=t.getUint8(5);await wait(100)}
-    const t2=await h.readValue(),dm=t2.getUint8(5),ds=t2.getUint8(6)
-    const sys=new Date()
-    let diff=(dm*60+ds)-(sys.getMinutes()*60+sys.getSeconds())
-    if(diff>1800)diff-=3600;if(diff<-1800)diff+=3600
-    await h.writeValueWithResponse(new Uint8Array([0x92,diff&255,(diff>>8)&255,0]))
-    lg('Hiệu chỉnh xong (lệch '+diff+'s)','ok')
-  }catch(e){lg('Lỗi: '+e.message,'er')}
-  b.disabled=!1
+  btn.disabled=!1
 }
 
 function dc(){if(d&&d.gatt.connected)d.gatt.disconnect();onDisc()}
-function onDisc(){d=null;s=null;c=null;h=null;a=null;ok=!1
+function onDisc(){
+  d=null;s=null;c=null;h=null;a=null;ok=!1
   document.getElementById('st').textContent='Chưa kết nối';document.getElementById('sd').className='off'
   document.getElementById('pn').classList.add('hid')
-  document.getElementById('bl').textContent='Kết nối';document.getElementById('bc').className='b-blue'
-  lg('Đã ngắt kết nối')}
-function wait(ms){return new Promise(r=>setTimeout(r,ms))}
-
-lg('Dùng Chrome/Edge trên Android hoặc Desktop','i')
-lg('Mở manhban.github.io/EinkMB/ để điều khiển','i')
-lg('Nhấn "Kết nối" và chọn DLG-CLOCK','i')
+  document.getElementById('bc').textContent='🔗 Kết nối';document.getElementById('bc').className='b-blue'
+  lg('Đã ngắt','i')}
 </script>
 </body>
 </html>
