@@ -157,14 +157,14 @@ async function syn(){
     buf[3]=n.getMonth();buf[4]=n.getDate();buf[5]=n.getHours()
     buf[6]=n.getMinutes();buf[7]=n.getSeconds();buf[8]=n.getDay()
     buf[9]=ly;buf[10]=lm-1;buf[11]=ld
-    await h.writeValue(buf);await rd()
+    await h.writeValueWithResponse(buf);await rd()
     lg('Đồng bộ xong!','ok')
   }catch(e){lg('Lỗi: '+e.message,'er')}
   b.disabled=!1;b.innerHTML='⏱ Đồng bộ'
 }
 
 async function tog(){
-  try{await h.writeValue(new Uint8Array([0x90]));lg('Đã chuyển 12h/24h','ok')}
+  try{await h.writeValueWithResponse(new Uint8Array([0x90]));lg('Đã chuyển 12h/24h','ok')}
   catch(e){lg('Lỗi: '+e.message,'er')}
 }
 
@@ -180,7 +180,7 @@ async function cal(){
     const sys=new Date()
     let diff=(dm*60+ds)-(sys.getMinutes()*60+sys.getSeconds())
     if(diff>1800)diff-=3600;if(diff<-1800)diff+=3600
-    await h.writeValue(new Uint8Array([0x92,diff&255,(diff>>8)&255,0]))
+    await h.writeValueWithResponse(new Uint8Array([0x92,diff&255,(diff>>8)&255,0]))
     lg('Hiệu chỉnh xong (lệch '+diff+'s)','ok')
   }catch(e){lg('Lỗi: '+e.message,'er')}
   b.disabled=!1
