@@ -114,6 +114,7 @@ async function go(){
     d.ongattserverdisconnected=onDisc
     s=await d.gatt.connect();c=await s.getPrimaryService(0xFF00)
     h=await c.getCharacteristic(0xFF01);a=await c.getCharacteristic(0xFF02)
+    lg('Properties: write='+h.properties.write+' writeWithoutResponse='+h.properties.writeWithoutResponse, 'ok')
     document.getElementById('dn').textContent=d.name
     await rd()
     ok=!0;document.getElementById('st').textContent='Đã kết nối';document.getElementById('sd').className='on'
@@ -157,7 +158,21 @@ async function syn(){
     buf[3]=n.getMonth();buf[4]=n.getDate();buf[5]=n.getHours()
     buf[6]=n.getMinutes();buf[7]=n.getSeconds();buf[8]=n.getDay()
     buf[9]=ly;buf[10]=lm-1;buf[11]=ld
-    await h.writeValueWithResponse(buf);await rd()
+    lg('Ghi '+buf.length+' bytes...')
+    try {
+      await h.writeValue(buf)
+    } catch(e1) {
+      lg('writeValue that bai, thu writeValueWithResponse...')
+      try {
+        await h.writeValueWithResponse(buf)
+      } catch(e2) {
+        lg('Ghi that bai hoan toan: '+e1.message, 'er')
+        b.disabled=!1;b.innerHTML='⏱ Đồng bộ'
+        return
+      }
+    }
+    lg('Ghi OK! Doc lai...')
+    await rd()
     lg('Đồng bộ xong!','ok')
   }catch(e){lg('Lỗi: '+e.message,'er')}
   b.disabled=!1;b.innerHTML='⏱ Đồng bộ'
