@@ -141,6 +141,22 @@ async function rd(){
   }catch(e){lg('Lỗi đọc: '+e.message,'er')}
 }
 
+async function testWrite() {
+  lg('TEST: ghi 1 byte 0x90...')
+  try {
+    await h.writeValue(new Uint8Array([0x90]))
+    lg('TEST: writeValue 0x90 OK!', 'ok')
+  } catch(e) {
+    lg('TEST: writeValue 0x90 that bai: '+e.message, 'er')
+    try {
+      await h.writeValueWithResponse(new Uint8Array([0x90]))
+      lg('TEST: writeValueWithResponse 0x90 OK!', 'ok')
+    } catch(e2) {
+      lg('TEST: ca 2 deu that bai: '+e2.message, 'er')
+    }
+  }
+}
+
 async function syn(){
   const b=document.querySelector('.b-green');b.disabled=!0;b.innerHTML='<span class="spin"></span> Đang đồng bộ...'
   try{
