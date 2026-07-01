@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ManhBan Clock v2.2</title>
+<title>ManhBan Clock v2.3</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#0a0e17;color:#eee;padding:12px;max-width:400px;margin:auto}
@@ -41,7 +41,7 @@ button:active{transform:scale(.97)}button:disabled{opacity:.35;cursor:default}
   </div>
 </div>
 <div class="log" id="lg"></div>
-<div class="ver">v2.2</div>
+<div class="ver">v2.3 - Tự động kết nối lại</div>
 </div>
 <script>
 function lg(m,t){const e=document.getElementById('lg')
@@ -134,10 +134,31 @@ async function tog(){
 
 function dc(){if(d&&d.gatt.connected)d.gatt.disconnect();onDisc()}
 function onDisc(){
-  d=null;s=null;c=null;h=null;a=null;ok=!1
-  document.getElementById('st').textContent='Chưa kết nối';document.getElementById('sd').className='red'
+  ok=!1;s=null;c=null;h=null;a=null
+  document.getElementById('st').textContent='Mất kết nối';document.getElementById('sd').className='red'
   document.getElementById('pn').classList.add('hid')
   document.getElementById('bc').textContent='🔗 Kết nối';document.getElementById('bc').className='blue'
+  // Tự động kết nối lại sau 3 giây
+  lg('Mất kết nối, đang thử lại...','i')
+  setTimeout(autoReconnect, 3000)
+}
+async function autoReconnect(){
+  if(!d || ok) return
+  try{
+    lg('Đang kết nối lại...','i')
+    s=await d.gatt.connect()
+    c=await s.getPrimaryService(0xFF00)
+    h=await c.getCharacteristic(0xFF01);a=await c.getCharacteristic(0xFF02)
+    try{await h.startNotifications()}catch(e){}
+    ok=!0;document.getElementById('st').textContent='Đã kết nối';document.getElementById('sd').className='green'
+    document.getElementById('pn').classList.remove('hid')
+    document.getElementById('bc').textContent='🔌 Ngắt';document.getElementById('bc').className='red2'
+    lg('Kết nối lại thành công!','ok')
+  }catch(e){
+    lg('Kết nối lại thất bại: '+e.message,'er')
+    lg('Nhấn "Kết nối" để thử lại','i')
+    d=null
+  }
 }
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 lg('Nhấn Kết nối, chọn DLG-CLOCK','i')
