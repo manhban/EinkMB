@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ManhBan Clock v2.1</title>
+<title>ManhBan Clock v2.2</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#0a0e17;color:#eee;padding:12px;max-width:400px;margin:auto}
@@ -10,17 +10,16 @@ h1{font-size:18px;text-align:center;color:#7c3aed;margin-bottom:2px}
 .sub{text-align:center;font-size:11px;color:#666;margin-bottom:14px}
 .bar{display:flex;justify-content:space-between;background:#1a2338;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px}
 .green{color:#34d399}.red{color:#ef4444}
-button{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:6px;color:#fff;transition:.2s}
+button{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:6px;color:#fff}
 button:active{transform:scale(.97)}button:disabled{opacity:.35;cursor:default}
-.blue{background:#2563eb}.red2{background:#dc2626}.green2{background:#059669}.yellow{background:#d97706}.gray{background:#374151}
+.blue{background:#2563eb}.red2{background:#dc2626}.green2{background:#059669}.yellow{background:#d97706}
 .hid{display:none!important}
 .grp{display:flex;gap:6px;margin-bottom:4px}.grp button{flex:1}
-.log{background:#050810;border-radius:10px;padding:10px;height:130px;overflow-y:auto;font-family:monospace;font-size:10px;line-height:1.5;margin-top:10px}
+.log{background:#050810;border-radius:10px;padding:10px;height:150px;overflow-y:auto;font-family:monospace;font-size:10px;line-height:1.5;margin-top:10px}
 .log .i{color:#93c5fd}.log .ok{color:#34d399}.log .er{color:#f87171}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
 .card{background:#1a2338;border-radius:8px;padding:8px;text-align:center}
 .card .l{font-size:9px;color:#888}.card .v{font-size:16px;font-weight:700;margin-top:2px}
-.card .v.s{font-size:11px}
 .ver{text-align:center;font-size:10px;color:#444;margin-top:10px}
 </style>
 </head>
@@ -32,24 +31,21 @@ button:active{transform:scale(.97)}button:disabled{opacity:.35;cursor:default}
 <button id="bc" class="blue" onclick="conn()">🔗 Kết nối</button>
 <div id="pn" class="hid">
   <div class="grid">
-    <div class="card"><div class="l">Thiết bị</div><div class="v s" id="dn">---</div></div>
+    <div class="card"><div class="l">Thiết bị</div><div class="v" id="dn">---</div></div>
     <div class="card"><div class="l">Pin</div><div class="v" id="dv">--V</div></div>
-    <div class="card"><div class="l">Giờ TB</div><div class="v" id="dt" style="font-size:11px">--:--</div></div>
-    <div class="card"><div class="l">Giờ Web</div><div class="v" id="sw" style="font-size:11px">--:--</div></div>
   </div>
   <div class="grp">
-    <button class="blue" onclick="test(0x90)">🔬 Test 0x90</button>
+    <button class="blue" onclick="test()">🔬 Test ghi</button>
     <button class="green2" onclick="syn()">⏱ Đồng bộ</button>
     <button class="yellow" onclick="tog()">🔄 12/24h</button>
   </div>
 </div>
 <div class="log" id="lg"></div>
-<div class="ver">v2.1 - github.com/manhban/EinkMB</div>
+<div class="ver">v2.2</div>
 </div>
 <script>
 function lg(m,t){const e=document.getElementById('lg')
   e.innerHTML+=`<div class="${t}">${m}</div>`;e.scrollTop=e.scrollHeight}
-setInterval(()=>{document.getElementById('sw').textContent=new Date().toLocaleString()},1000)
 let d,s,c,h,a,ok=!1
 
 async function conn(){
@@ -58,8 +54,22 @@ async function conn(){
   try{
     d=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'DLG-CLOCK'}],optionalServices:[0xFF00]})
     d.ongattserverdisconnected=onDisc
-    s=await d.gatt.connect();c=await s.getPrimaryService(0xFF00)
-    h=await c.getCharacteristic(0xFF01);a=await c.getCharacteristic(0xFF02)
+    s=await d.gatt.connect()
+    lg('GATT connected','ok')
+    // Discover all services
+    const svcs=await s.getPrimaryServices()
+    lg('Services: '+svcs.map(x=>'0x'+x.uuid.slice(2,6)).join(', '))
+    for(let svc of svcs){
+      if(svc.uuid.includes('ff00')){
+        c=svc;break
+      }
+    }
+    if(!c){lg('Service 0xFF00 not found!','er');dc();b.disabled=!1;return}
+    h=await c.getCharacteristic(0xFF01)
+    a=await c.getCharacteristic(0xFF02)
+    lg('Chars 0xFF01 + 0xFF02 OK','ok')
+    // Enable notifications
+    try{await h.startNotifications()}catch(e){lg('Note: startNotifications failed (ignored)','i')}
     document.getElementById('dn').textContent=d.name
     try{
       const v=await a.readValue();const vt=v.getUint16(0,!0)/1000
@@ -73,20 +83,28 @@ async function conn(){
   b.disabled=!1
 }
 
-async function test(cmd){
+async function writeBLE(buf){
+  // Method 1: writeValue
+  try{await h.writeValue(buf);return 'writeValue'}
+  catch(e){}
+  // Method 2: writeValueWithResponse
+  try{await h.writeValueWithResponse(buf);return 'writeValueWithResponse'}
+  catch(e){}
+  return null
+}
+
+async function test(){
   if(!h){lg('Chưa kết nối','er');return}
-  const buf=new Uint8Array(cmd==0x90?1:12)
-  buf[0]=cmd
-  lg('Ghi 0x'+cmd.toString(16)+'...','i')
-  // Thử writeValue trước
-  try{await h.writeValue(buf);lg('writeValue() OK!','ok');return}catch(e){}
-  // Thử writeValueWithResponse
-  try{await h.writeValueWithResponse(buf);lg('writeValueWithResponse() OK!','ok');return}catch(e){}
-  lg('Cả 2 đều lỗi!','er')
+  lg('=== TEST GHI ===','i')
+  // Test read first
+  try{await h.readValue();lg('Đọc OK','ok')}catch(e){lg('Đọc lỗi: '+e.message,'er')}
+  // Write 1 byte
+  const r=await writeBLE(new Uint8Array([0x90]))
+  lg(r?'writeValue('+r+') OK':'CẢ 2 ĐỀU LỖI!',r?'ok':'er')
 }
 
 async function syn(){
-  const b=document.querySelector('.green2');b.disabled=!0;b.innerHTML='⏳ Đồng bộ...'
+  const b=document.querySelector('.green2');b.disabled=!0;b.innerHTML='⏳ Đang đồng bộ...'
   try{
     while(Date.now()%1000>50)await wait(20)
     const n=new Date();let lm=1,ld=1,ly=n.getFullYear()-2020
@@ -101,18 +119,17 @@ async function syn(){
     buf[3]=n.getMonth();buf[4]=n.getDate();buf[5]=n.getHours()
     buf[6]=n.getMinutes();buf[7]=n.getSeconds();buf[8]=n.getDay()
     buf[9]=ly;buf[10]=lm-1;buf[11]=ld
-    // Thử writeValue trước
-    try{await h.writeValue(buf);lg('Đồng bộ OK!','ok');b.disabled=!1;b.innerHTML='⏱ Đồng bộ';return}catch(e){}
-    // Thử writeValueWithResponse
-    await h.writeValueWithResponse(buf)
-    lg('Đồng bộ OK!','ok')
-  }catch(e){lg('Lỗi: '+e.message,'er')}
+    lg('Đồng bộ...','i')
+    const r=await writeBLE(buf)
+    if(!r){lg('Lỗi ghi!','er');b.disabled=!1;b.innerHTML='⏱ Đồng bộ';return}
+    lg('OK via '+r,'ok')
+  }catch(e){lg(e.message,'er')}
   b.disabled=!1;b.innerHTML='⏱ Đồng bộ'
 }
 
 async function tog(){
-  try{await h.writeValueWithResponse(new Uint8Array([0x90]));lg('Đã chuyển','ok')}
-  catch(e){lg('Lỗi: '+e.message,'er')}
+  const r=await writeBLE(new Uint8Array([0x90]))
+  lg(r?'OK: '+r:'Lỗi!',r?'ok':'er')
 }
 
 function dc(){if(d&&d.gatt.connected)d.gatt.disconnect();onDisc()}
